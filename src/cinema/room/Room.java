@@ -1,20 +1,33 @@
 package cinema.room;
 
-public class Room {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
+
+public class Room {
+    @JsonProperty("total_rows")
     private final Integer rowNumber;
+    @JsonProperty("total_columns")
     private final Integer seatsInRowNumber;
-    private final Boolean[][] seats;
+    @JsonProperty("available_seats") //todo proper json
+    private final boolean[][] seats;
 
     public Room(Integer rowNumber, Integer seatsInRowNumber) {
+        seats = new boolean[rowNumber][seatsInRowNumber];
         this.rowNumber = rowNumber;
         this.seatsInRowNumber = seatsInRowNumber;
-        seats = new Boolean[rowNumber][seatsInRowNumber];
     }
 
     @Override
     public String toString() {
         return "Room: " + rowNumber + " x " + seatsInRowNumber;
+    }
+
+    public String toJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
     }
 
     public Integer getRowNumber() {
@@ -25,7 +38,7 @@ public class Room {
         return seatsInRowNumber;
     }
 
-    public Boolean[][] getSeats() {
+    public boolean[][] getSeats() {
         return seats;
     }
 }
