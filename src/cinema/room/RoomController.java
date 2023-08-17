@@ -14,8 +14,9 @@ public class RoomController {
     }
 
     @GetMapping("seats")
-    public String getRoomAsString() throws JsonProcessingException {
-        return this.room.toJson();
+    public String getRoomAsJson() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(room);
     }
 
 

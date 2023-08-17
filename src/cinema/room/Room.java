@@ -1,10 +1,9 @@
 package cinema.room;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Arrays;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Room {
     @JsonProperty("total_rows")
@@ -25,20 +24,21 @@ public class Room {
         return "Room: " + rowNumber + " x " + seatsInRowNumber;
     }
 
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
-    }
+    @JsonProperty("available_seats")
+    private ArrayNode availableSeatsJson() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode availableSeatsArray = objectMapper.createArrayNode();
 
-    public Integer getRowNumber() {
-        return rowNumber;
-    }
-
-    public Integer getSeatsInRowNumber() {
-        return seatsInRowNumber;
-    }
-
-    public boolean[][] getSeats() {
-        return seats;
+        for (int i = 0; i < seats.length; i++) {
+            for (int j = 0; j < seats[0].length; j++) {
+                if (!seats[i][j]) {
+                    ObjectNode seatNode = objectMapper.createObjectNode();
+                    seatNode.put("row", i + 1);
+                    seatNode.put("column", j + 1);
+                    availableSeatsArray.add(seatNode);
+                }
+            }
+        }
+        return availableSeatsArray;
     }
 }
