@@ -12,6 +12,8 @@ public class Room {
     private final Integer columnNumber;
     @JsonProperty("available_seats")
     private final Seat[][] seats;
+    private int availableSeatNumber;
+    private int income;
 
     public Room(Integer rowNumber, Integer columnNumber) {
         seats = new Seat[rowNumber][columnNumber];
@@ -22,6 +24,8 @@ public class Room {
         }
         this.rowNumber = rowNumber;
         this.columnNumber = columnNumber;
+        this.availableSeatNumber = rowNumber * columnNumber;
+        this.income = 0;
     }
 
     @Override
@@ -37,18 +41,32 @@ public class Room {
         if (seat.isBought()) {
             throw new SeatPurchaseException("The ticket has been already purchased!");
         }
-        return seat.buy();
+        ObjectNode response = seat.buy();
+        income += response.get("ticket").get("price").asInt();
+        availableSeatNumber--;
+        return response;
     }
 
     protected ObjectNode returnTicket(String token) {
         for (Seat[] rows : seats) {
             for (Seat seat : rows) {
                 if (seat.getTicketUuid().toString().equals(token)) {
-                    return seat.returnTicket();
+                    ObjectNode response = seat.returnTicket();
+                    income -= response.get("returned_ticket").get("price").asInt();
+                    availableSeatNumber++;
+                    return response;
                 }
             }
         }
         throw new SeatPurchaseException("Wrong token!");
+    }
+
+    protected ObjectNode getStats() {
+        ObjectNode response = new ObjectMapper().createObjectNode();
+        response.put("current_income", income);
+        response.put("number_of_available_seats", availableSeatNumber);
+        response.put("number_of_purchased_tickets", rowNumber * columnNumber - availableSeatNumber);
+        return response;
     }
 
     private boolean isSeatInBounds(int row, int col) {

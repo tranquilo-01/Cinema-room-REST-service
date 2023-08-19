@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -42,6 +43,14 @@ public class RoomController {
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
     }
 
+    @GetMapping("stats")
+    public String stats(@RequestParam String password) throws JsonProcessingException {
+        if(password.equals("super_secret")){
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(room.getStats());
+        }
+        throw new StatsAuthException("The password is wrong!");
+    }
+
     /**
      * method takes over handling SeatPurchaseException in this controller class,
      * that might be thrown in purchaseSeat method.
@@ -53,5 +62,11 @@ public class RoomController {
     public ResponseEntity<SimpleErrorMessage> handleSeatPurchaseException(SeatPurchaseException exception) {
         SimpleErrorMessage body = new SimpleErrorMessage(exception.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({StatsAuthException.class, MissingServletRequestParameterException.class})
+    public ResponseEntity<SimpleErrorMessage> handleAuthException(){
+        SimpleErrorMessage body = new SimpleErrorMessage("The password is wrong!");
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 }
