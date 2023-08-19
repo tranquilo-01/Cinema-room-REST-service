@@ -6,3 +6,5 @@ Project from JB Academy Backend Java Developer Track
 - Gradle
 - Spring Boot
 - Jackson
+
+Project uses a few REST endpoints that simulate cinema room ticket booth
