@@ -20,7 +20,6 @@ public class Room {
                 seats[i][j] = new Seat(i + 1, j + 1);
             }
         }
-
         this.rowNumber = rowNumber;
         this.columnNumber = columnNumber;
     }
@@ -32,13 +31,24 @@ public class Room {
 
     protected ObjectNode purchaseSeat(int row, int col) {
         if (!isSeatInBounds(row, col)) {
-            throw new SeatPurchaseException("The number of a row or a column is out of bounds!" + row + " " + col);
+            throw new SeatPurchaseException("The number of a row or a column is out of bounds!");
         }
         Seat seat = getSeat(row, col);
         if (seat.isBought()) {
             throw new SeatPurchaseException("The ticket has been already purchased!");
         }
         return seat.buy();
+    }
+
+    protected ObjectNode returnTicket(String token) {
+        for (Seat[] rows : seats) {
+            for (Seat seat : rows) {
+                if (seat.getTicketUuid().toString().equals(token)) {
+                    return seat.returnTicket();
+                }
+            }
+        }
+        throw new SeatPurchaseException("Wrong token!");
     }
 
     private boolean isSeatInBounds(int row, int col) {

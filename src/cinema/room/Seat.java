@@ -11,6 +11,7 @@ public class Seat {
     private int price;
     private boolean bought;
     private UUID uuid;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Seat() {
     }
@@ -29,6 +30,15 @@ public class Seat {
         return ticketBoughtResponse();
     }
 
+    public ObjectNode returnTicket() {
+        if (!this.bought) {
+            throw new SeatPurchaseException("Cannot return the seat that is not bought!");
+        }
+        this.bought = false;
+        setNilUuid();
+        return ticketReturnedResponse();
+    }
+
     private UUID generateUuid() {
         return UUID.randomUUID();
     }
@@ -38,8 +48,6 @@ public class Seat {
     }
 
     private ObjectNode ticketBoughtResponse() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         ObjectNode ticketNode = objectMapper.createObjectNode();
         ticketNode.put("row", row);
         ticketNode.put("column", column);
@@ -50,6 +58,17 @@ public class Seat {
         responseNode.set("ticket", ticketNode);
         return responseNode;
 
+    }
+
+    private ObjectNode ticketReturnedResponse() {
+        ObjectNode ticketNode = objectMapper.createObjectNode();
+        ticketNode.put("row", row);
+        ticketNode.put("column", column);
+        ticketNode.put("price", price);
+
+        ObjectNode responseNode = objectMapper.createObjectNode();
+        responseNode.set("returned_ticket", ticketNode);
+        return responseNode;
     }
 
 
