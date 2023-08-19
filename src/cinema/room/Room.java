@@ -10,11 +10,17 @@ public class Room {
     private final Integer rowNumber;
     @JsonProperty("total_columns")
     private final Integer columnNumber;
-    @JsonProperty("available_seats") //todo proper json
-    private final boolean[][] seats;
+    @JsonProperty("available_seats")
+    private final Seat[][] seats;
 
     public Room(Integer rowNumber, Integer columnNumber) {
-        seats = new boolean[rowNumber][columnNumber];
+        seats = new Seat[rowNumber][columnNumber];
+        for (int i = 0; i < rowNumber; i++) {
+            for (int j = 0; j < columnNumber; j++) {
+                seats[i][j] = new Seat(i+1, j+1);
+            }
+        }
+
         this.rowNumber = rowNumber;
         this.columnNumber = columnNumber;
     }
@@ -28,21 +34,19 @@ public class Room {
         if (!isSeatInBounds(row, col)) {
             throw new SeatPurchaseException("The number of a row or a column is out of bounds!");
         }
-        if (!isSeatAvailable(row, col)) {
+        Seat seat = getSeat(row, col);
+        if (seat.isBought()) {
             throw new SeatPurchaseException("The ticket has been already purchased!");
         }
-
-        seats[row - 1][col - 1] = true;
-
-        return getSeatPrice(row, col);
+        return seat.buy();
     }
 
     private boolean isSeatInBounds(int row, int col) {
         return 1 <= row && row <= rowNumber && 1 <= col && col <= columnNumber;
     }
 
-    private int getSeatPrice(int row, int col) {
-        return row <= 4 ? 10 : 8;
+    public Seat getSeat(int row, int col){
+        return seats[row-1][col-1];
     }
 
     @JsonProperty("available_seats")
@@ -50,13 +54,14 @@ public class Room {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode availableSeatsArray = objectMapper.createArrayNode();
 
-        for (int i = 0; i < seats.length; i++) {
-            for (int j = 0; j < seats[0].length; j++) {
-                if (isSeatAvailable(i + 1, j + 1)) {
+        for (int i = 1; i <= rowNumber; i++) {
+            for (int j = 1; j <= columnNumber; j++) {
+                Seat seat = getSeat(i, j);
+                if (!seat.isBought()) {
                     ObjectNode seatNode = objectMapper.createObjectNode();
-                    seatNode.put("row", i + 1);
-                    seatNode.put("column", j + 1);
-                    seatNode.put("price", getSeatPrice(i + 1, j + 1));
+                    seatNode.put("row", i);
+                    seatNode.put("column", j);
+                    seatNode.put("price", seat.getPrice());
                     availableSeatsArray.add(seatNode);
                 }
             }
@@ -64,7 +69,4 @@ public class Room {
         return availableSeatsArray;
     }
 
-    private boolean isSeatAvailable(int row, int col) {
-        return !seats[row - 1][col - 1]; // decremented, so it is an index, not a row number
-    }
 }
