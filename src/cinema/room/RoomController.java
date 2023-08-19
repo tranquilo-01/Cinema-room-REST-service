@@ -3,10 +3,10 @@ package cinema.room;
 import cinema.SimpleErrorMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 public class RoomController {
@@ -24,18 +24,17 @@ public class RoomController {
 
     @PostMapping("purchase")
     public String purchaseSeat(@RequestBody Seat seat) throws JsonProcessingException {
-        int price;
         int row = seat.getRow();
         int column = seat.getColumn();
-        price = room.purchaseSeat(row, column);
+        ObjectNode response = room.purchaseSeat(row, column);
 
-        Map<String, Integer> successMap = Map.of("row", row, "column", column, "price", price);
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(successMap);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
     }
 
     /**
      * method takes over handling SeatPurchaseException in this controller class,
      * that might be thrown in purchaseSeat method.
+     *
      * @param exception SeatPurchaseException
      * @return ResponseEntity containing body of simple error message and http 400 status
      */

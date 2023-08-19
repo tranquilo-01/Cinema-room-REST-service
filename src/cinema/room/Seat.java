@@ -1,12 +1,16 @@
 package cinema.room;
 
-// artificial class created only for RoomController POST with body
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.UUID;
+
 public class Seat {
     private int row;
     private int column;
     private int price;
     private boolean bought;
-    private String ticketToken;
+    private UUID uuid;
 
     public Seat() {
     }
@@ -16,9 +20,42 @@ public class Seat {
         this.column = column;
         this.price = row <= 4 ? 10 : 8;
         this.bought = false;
-        this.ticketToken = "";
+        this.uuid = new UUID(0, 0);
     }
 
+    public ObjectNode buy() {
+        this.bought = true;
+        this.uuid = generateUuid();
+        return ticketBoughtResponse();
+    }
+
+    private UUID generateUuid() {
+        return UUID.randomUUID();
+    }
+
+    private void setNilUuid() {
+        this.uuid = new UUID(0, 0);
+    }
+
+    private ObjectNode ticketBoughtResponse() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode ticketNode = objectMapper.createObjectNode();
+        ticketNode.put("row", row);
+        ticketNode.put("column", column);
+        ticketNode.put("price", price);
+
+        ObjectNode responseNode = objectMapper.createObjectNode();
+        responseNode.put("token", uuid.toString());
+        responseNode.set("ticket", ticketNode);
+        return responseNode;
+
+    }
+
+
+    //
+//    ----------------getters and setters-------------------
+//
     public int getRow() {
         return row;
     }
@@ -27,7 +64,7 @@ public class Seat {
         return column;
     }
 
-    public int getPrice(){
+    public int getPrice() {
         return price;
     }
 
@@ -35,14 +72,9 @@ public class Seat {
         return bought;
     }
 
-    public String getTicketToken() {
-        return ticketToken;
+    public UUID getTicketUuid() {
+        return uuid;
     }
 
-    protected int buy(){
-        this.bought = true;
-//        TODO: generating ticket token
-        return getPrice();
-    }
 
 }

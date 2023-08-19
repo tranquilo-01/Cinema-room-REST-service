@@ -17,7 +17,7 @@ public class Room {
         seats = new Seat[rowNumber][columnNumber];
         for (int i = 0; i < rowNumber; i++) {
             for (int j = 0; j < columnNumber; j++) {
-                seats[i][j] = new Seat(i+1, j+1);
+                seats[i][j] = new Seat(i + 1, j + 1);
             }
         }
 
@@ -30,9 +30,9 @@ public class Room {
         return "Room: " + rowNumber + " x " + columnNumber;
     }
 
-    protected int purchaseSeat(int row, int col) {
+    protected ObjectNode purchaseSeat(int row, int col) {
         if (!isSeatInBounds(row, col)) {
-            throw new SeatPurchaseException("The number of a row or a column is out of bounds!");
+            throw new SeatPurchaseException("The number of a row or a column is out of bounds!" + row + " " + col);
         }
         Seat seat = getSeat(row, col);
         if (seat.isBought()) {
@@ -45,8 +45,8 @@ public class Room {
         return 1 <= row && row <= rowNumber && 1 <= col && col <= columnNumber;
     }
 
-    public Seat getSeat(int row, int col){
-        return seats[row-1][col-1];
+    public Seat getSeat(int row, int col) {
+        return seats[row - 1][col - 1];
     }
 
     @JsonProperty("available_seats")
